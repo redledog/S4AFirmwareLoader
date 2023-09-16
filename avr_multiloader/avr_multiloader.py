@@ -75,7 +75,7 @@ class avrdude():
     def flashFirmware(self, hexFile, extraFlags=None):
         options = ['-c', self.programmer_id, '-b', str(self.baud_rate), 
                    '-p', self.partno, '-P', self.port, '-C', self.avrconf,
-                   '-U', 'flash:w:{}:i'.format(hexFile)]
+                   '-U', f'flash:w:{hexFile}:i']
         if extraFlags is not None:
             options.extend(extraFlags)
 

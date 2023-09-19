@@ -1,4 +1,4 @@
-import os
+from path import Path
 import serial.tools.list_ports
 from avr_multiloader import avr_multiloader 
 
@@ -25,8 +25,12 @@ def get_ports():
     return available_port
 
 def get_avrdude(comport, baud_rate):
-    return avr_multiloader.avrdude(partno='ATmega328P', programmer_id='arduino', baud_rate=baud_rate,
-            port=comport)
+    avrd = avr_multiloader.avrdude(partno='ATmega328P', programmer_id='arduino', baud_rate=baud_rate,
+            port=comport, confpath='./avrdude/avrdude.conf')
+    avrd.avrdudePath = Path('./avrdude/avrdude.exe').abspath()
+    print(avrd.avrdudePath)
+    print(avrd.avrconf)
+    return avrd
 
 def connect_test(avrdude_obj : avr_multiloader.avrdude):
     output, error_out = avrdude_obj.testConnection()
@@ -34,6 +38,6 @@ def connect_test(avrdude_obj : avr_multiloader.avrdude):
 
 # upload hex file to arduino
 def upload_hex_file(avrdude_obj : avr_multiloader.avrdude):
-    hex_path = os.path.abspath(f"./hex/{HEX_FILE}")
+    hex_path = Path(f"./hex/{HEX_FILE}").abspath()
     output, error_out = avrdude_obj.flashFirmware(hex_path, ['-vv'])
     return output, error_out

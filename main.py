@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
 from arduinolib import arduino
-import os
+from path import Path
 
 def refresh_comport(cbbox : ttk.Combobox):
     comport_list = arduino.get_ports()
@@ -23,16 +23,23 @@ def test_connect(comport, baudrate):
         return
     print(comport, baudrate)
     res = arduino.connect_test(arduino.get_avrdude(comport, baudrate))
-    messagebox.showinfo("알림","통신 완료!")
-    print(f"result : {res[0]}\nerror:{res[1]}")
+    set_log_text(res)
+    messagebox.showinfo("알림","작업 완료!")
 
 def upload_file(comport, baudrate):
     if not check_comport(comport):
         return
     res = arduino.upload_hex_file(arduino.get_avrdude(comport, baudrate))
-    messagebox.showinfo("알림","통신 완료!")
-    print(f"result : {res[0]}\nerror:{res[1]}")
+    set_log_text(res)
+    messagebox.showinfo("알림","작업 완료!")
 
+def set_log_text(text):
+    log_txt.config(state=tk.NORMAL)
+    log_txt.delete("1.0", tk.END)
+    for t in text:
+        log_txt.insert(tk.END, f"{t.decode('cp949')}\n")
+        print(f"{t.decode('cp949')}\n")
+    log_txt.config(state=tk.DISABLED)
 
 win = tk.Tk()
 win.title("S4A 펌웨어 로더")
@@ -42,16 +49,18 @@ win.geometry(f"+{win_w//3}+{win_h//3}")
 win.resizable(False, False)
 
 # icon 적용
-icon_path = os.path.abspath("./logo.png")
+icon_path = Path("./logo.png").abspath()
 icon_img = tk.PhotoImage(file = icon_path)
 win.iconphoto(False, icon_img)
 
-comport_list = arduino.get_ports()
+comport_list = []
 
 com_port_frame = ttk.Frame(win)
 com_port_frame.pack()
 upload_frame = ttk.Frame(win)
 upload_frame.pack()
+log_frame = ttk.Frame(win)
+log_frame.pack()
 
 lbl1 = ttk.Label(com_port_frame, text="COM 선택 ")
 com_cbbox = ttk.Combobox(com_port_frame, values=comport_list)
@@ -77,5 +86,10 @@ test_btn.pack()
 upload_btn = ttk.Button(upload_frame, text="업로드",
                         command = lambda: upload_file(com_cbbox.get(), baud_cbbox.get()))
 upload_btn.pack()
+
+log_label = ttk.Label(log_frame, text='Log')
+log_label.pack()
+log_txt = tk.Text(log_frame, state=tk.DISABLED)
+log_txt.pack()
 
 win.mainloop()

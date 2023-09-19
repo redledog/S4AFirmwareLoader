@@ -19,9 +19,9 @@ def get_ports():
     available_port = []
 
     for p in ports:
-        available_port.append(p.device)
-        
-    print(available_port)
+        #available_port.append(p.device)
+        available_port.append(p)
+    
     return available_port
 
 def get_avrdude(comport, baud_rate):

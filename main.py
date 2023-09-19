@@ -1,50 +1,59 @@
-import tkinter as tk
-import tkinter.ttk as ttk
-from tkinter import messagebox
+import ttkbootstrap as ttk
+from ttkbootstrap.constants import *
+from ttkbootstrap.scrolled import ScrolledText
+from ttkbootstrap.dialogs.dialogs import Messagebox
 from arduinolib import arduino
 from resourece_path import init_resource_path
 from path import Path
 
+TTK_THEME = ""
+
 def refresh_comport(cbbox : ttk.Combobox):
+    global comport_list
     comport_list = arduino.get_ports()
     cbbox['values'] = comport_list
     if len(comport_list) > 0:
-        cbbox.set(comport_list[0])
+        cbbox.set(comport_list[-1])
     else:
         cbbox.set("")
 
 def check_comport(comport):
     if comport == "":
-        messagebox.showwarning("경고!","COM 포트가 비어있습니다.")
+        show_messageBox("경고!","COM 포트가 비어있습니다.", msg_type="error")
         return False
     return True
 
 def test_connect(comport, baudrate):
     if not check_comport(comport):
         return
-    print(comport, baudrate)
-    res = arduino.connect_test(arduino.get_avrdude(comport, baudrate))
+    res = arduino.connect_test(arduino.get_avrdude(comport_list[comport].name, baudrate))
     set_log_text(res)
-    messagebox.showinfo("알림","작업 완료!")
+    show_messageBox("알림","작업 완료!")
 
 def upload_file(comport, baudrate):
     if not check_comport(comport):
         return
-    res = arduino.upload_hex_file(arduino.get_avrdude(comport, baudrate))
+    res = arduino.upload_hex_file(arduino.get_avrdude(comport_list[comport].name, baudrate))
     set_log_text(res)
-    messagebox.showinfo("알림","작업 완료!")
+    show_messageBox("알림","작업 완료!")
 
 def set_log_text(text):
-    log_txt.config(state=tk.NORMAL)
-    log_txt.delete("1.0", tk.END)
+    log_txt.text.config(state=ttk.NORMAL)
+    log_txt.text.delete("1.0", ttk.END)
     for t in text:
-        log_txt.insert(tk.END, f"{t.decode('cp949')}\n")
+        log_txt.text.insert(ttk.END, f"{t.decode('cp949')}\n")
         print(f"{t.decode('cp949')}\n")
-    log_txt.config(state=tk.DISABLED)
-    
+    log_txt.text.config(state = ttk.DISABLED)
+
+def show_messageBox(_title, text, msg_type="info"):
+    if msg_type == "error":
+        Messagebox.show_error(title=_title, message=text)
+    else:
+        Messagebox.ok(titme=_title, message=text)
+
 init_resource_path()
 
-win = tk.Tk()
+win = ttk.Window()
 win.title("S4A 펌웨어 로더")
 win_w = win.winfo_screenwidth()
 win_h = win.winfo_screenheight()
@@ -53,7 +62,7 @@ win.resizable(False, False)
 
 # icon 적용
 icon_path = Path("./imgs/logo.png").abspath()
-icon_img = tk.PhotoImage(file = icon_path)
+icon_img = ttk.PhotoImage(file = icon_path)
 win.iconphoto(False, icon_img)
 
 comport_list = []
@@ -82,17 +91,18 @@ baud_cbbox = ttk.Combobox(upload_frame, values=arduino.BAUD_RATE)
 baud_cbbox.set(115200)
 baud_cbbox.pack(side="left")
 
-test_btn = ttk.Button(upload_frame, text="연결 테스트",
-                    command = lambda: test_connect(com_cbbox.get(), baud_cbbox.get()))
-test_btn.pack()
+test_btn = ttk.Button(upload_frame, text="연결 테스트", bootstyle=INFO,
+                    command = lambda: test_connect(com_cbbox.current(), baud_cbbox.get()))
+test_btn.pack(side="left")
 
-upload_btn = ttk.Button(upload_frame, text="업로드",
-                        command = lambda: upload_file(com_cbbox.get(), baud_cbbox.get()))
-upload_btn.pack()
+upload_btn = ttk.Button(upload_frame, text="업로드",bootstyle=SUCCESS,
+                        command = lambda: upload_file(com_cbbox.current(), baud_cbbox.get()))
+upload_btn.configure()
+upload_btn.pack(side="left")
 
 log_label = ttk.Label(log_frame, text='Log')
 log_label.pack()
-log_txt = tk.Text(log_frame, state=tk.DISABLED)
-log_txt.pack()
+log_txt = ScrolledText(log_frame, state=ttk.DISABLED, wrap="none", autohide=True, vbar=True, hbar=True, bootstyle=INFO, padding=5)
+log_txt.pack(fill=BOTH, expand=YES)
 
 win.mainloop()

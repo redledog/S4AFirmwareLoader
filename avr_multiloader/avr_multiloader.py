@@ -7,21 +7,13 @@ Inspired by avr_helpers written by Ryan Fobel
 """
 
 import os
-from subprocess import Popen, PIPE, CalledProcessError
+from subprocess import Popen, PIPE
 import logging
-import platform
-import warnings
 
 # from pathlib import Path
 from path import Path
-from serial_device2 import (
-    WriteError,
-    ReadError,
-    SerialDevice,
-    SerialDevices,
-    find_serial_device_ports,
-    find_serial_device_port,
-)
+
+logger = logging.getLogger()
 
 try:
     from shutil import which
@@ -30,7 +22,6 @@ except:
         "shutil.which not found, location of avrdude needs to be ", "set manually "
     )
 
-logger = logging.getLogger()
 
 
 class FirmwareError(Exception):

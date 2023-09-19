@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
 from arduinolib import arduino
+from resourece_path import init_resource_path
 from path import Path
 
 def refresh_comport(cbbox : ttk.Combobox):
@@ -40,6 +41,8 @@ def set_log_text(text):
         log_txt.insert(tk.END, f"{t.decode('cp949')}\n")
         print(f"{t.decode('cp949')}\n")
     log_txt.config(state=tk.DISABLED)
+    
+init_resource_path()
 
 win = tk.Tk()
 win.title("S4A 펌웨어 로더")
@@ -49,7 +52,7 @@ win.geometry(f"+{win_w//3}+{win_h//3}")
 win.resizable(False, False)
 
 # icon 적용
-icon_path = Path("./logo.png").abspath()
+icon_path = Path("./imgs/logo.png").abspath()
 icon_img = tk.PhotoImage(file = icon_path)
 win.iconphoto(False, icon_img)
 

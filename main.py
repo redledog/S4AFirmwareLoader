@@ -54,7 +54,7 @@ def show_messageBox(_title, text, msg_type="info"):
 init_resource_path()
 
 win = ttk.Window()
-win.title("S4A 펌웨어 로더")
+win.title("S4A 펌웨어 로더 made by YG")
 win_w = win.winfo_screenwidth()
 win_h = win.winfo_screenheight()
 win.geometry(f"+{win_w//3}+{win_h//3}")
